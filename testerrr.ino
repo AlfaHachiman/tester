@@ -33,7 +33,7 @@ void loop() {    // loop artinya berulang
   Serial.print(distance);
   Serial.println(" cm");
 
-  if (distance < 4) {    //ini jarak ketriggernya
+  if (distance < 20) {    //ini jarak ketriggernya
     digitalWrite(LED_PIN, HIGH);  // lampu nyala trus
   }
     else {
