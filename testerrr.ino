@@ -1,41 +1,44 @@
-#define LED_PIN 13
-#define TRIG_PIN 9
-#define ECHO_PIN 10
+#define TRIG_PIN 9    //arduino to sensor
+#define ECHO_PIN 10    //sensor to arduino
+#define LED_PIN 13    //lampu
+// bagian atas ini adalah definisi dari pin pin yg kita pake
+
+bool objectDetected = false; // status sebelumnya
 
 void setup() {
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
   pinMode(LED_PIN, OUTPUT);
-  Serial.begin(9600);
+  Serial.begin(9600);  // ini adalah serial untuk kecepatan komunikasi
 }
 
-void loop() {
-  long duration;
-  int distance;
+void loop() {    // loop artinya berulang
+  int distance = 0;   //ini insial jaraknya, dibuat nol karna takut tabrakan dengan sampah
 
-  // Kirim sinyal ultrasonik
-  digitalWrite(TRIG_PIN, LOW);
-  delayMicroseconds(2);
-  digitalWrite(TRIG_PIN, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(TRIG_PIN, LOW);
+  if (Serial.available()) {    //ini jika punya monitoring seperti pake pc atau wokwi
+    distance = Serial.parseInt();   // Baca nilai dari Serial Monitor
+    Serial.read();    // Bersihkan buffer
 
-  // Baca durasi pantulan
-  duration = pulseIn(ECHO_PIN, HIGH);
+  } else {    //ini kalo gada serial monitoring kayak wokwi, kodingan realnya
+    digitalWrite(TRIG_PIN, LOW);  
+    delayMicroseconds(2);
+    digitalWrite(TRIG_PIN, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(TRIG_PIN, LOW);
+    long duration = pulseIn(ECHO_PIN, HIGH);
+    distance = duration * 0.034 / 2;
+  }
 
-  // Hitung jarak (dalam cm)
-  distance = duration * 0.034 / 2;
-
-  // Tampilkan jarak di Serial Monitor
-  Serial.print("jarak terdeteksi: ");
+  Serial.print("Jarak terdeteksi: ");    // ini untuk menampilkan info simulasi di serialnya
   Serial.print(distance);
   Serial.println(" cm");
 
-  // Nyalakan LED jika jarak < 4 cm
-  if (distance < 4) {    
-    digitalWrite(LED_PIN, HIGH);
-  } else {
-    digitalWrite(LED_PIN, LOW);
+  if (distance < 4) {    //ini jarak ketriggernya
+    digitalWrite(LED_PIN, HIGH);  // lampu nyala trus
+  }
+    else {
+    digitalWrite(LED_PIN, LOW);   //lampunya mati
+    objectDetected = false; // ketika objek menjauh maka statusnya akan tereset ulang menjadi tidak terdeteksi
   }
 
   delay(100);
